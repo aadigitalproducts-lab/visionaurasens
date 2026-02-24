@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>AuraSens - Versión Móvil Optimizada</title>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #050505; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #d4af37; }
+        
+        .serif-text { font-family: 'Garamond', 'Times New Roman', serif; }
+
+        #container { position: relative; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .input_video { display: none; }
+        /* El espejado ahora lo controla JS dependiendo de la cámara */
+        .output_canvas { width: 100vw; height: 100vh; object-fit: cover; } 
+
+        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); text-align: center; }
+        
+        #intro-screen { background: rgba(10, 10, 12, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 10; }
+        
+        .logo-title { font-size: 4rem; letter-spacing: 6px; margin-bottom: 5px; text-transform: uppercase; background: linear-gradient(135deg, #FFDF73 0%, #d4af37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 4px 15px rgba(212, 175, 55, 0.3)); }
+        .logo-subtitle { font-size: 1rem; letter-spacing: 4px; color: rgba(255, 255, 255, 0.8); margin-bottom: 60px; font-weight: 300; text-transform: uppercase; }
+        
+        button { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(212, 175, 55, 0.4); color: #FFDF73; padding: 16px 40px; font-size: 0.9rem; letter-spacing: 2px; cursor: pointer; transition: all 0.4s ease; text-transform: uppercase; border-radius: 50px; margin: 10px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); font-weight: 500; }
+        button:hover { background: rgba(212, 175, 55, 0.15); border-color: #FFDF73; box-shadow: 0 8px 32px 0 rgba(212, 175, 55, 0.2), inset 0 0 15px rgba(212, 175, 55, 0.1); transform: translateY(-2px); color: #fff; }
+        #btn-num { background: rgba(212, 175, 55, 0.15); font-weight: 600; color: #fff; border: 1px solid rgba(212, 175, 55, 0.6); }
+
+        /* NUEVOS CONTROLES SUPERIORES (Cámara y Sonido) */
+        .top-controls { position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; z-index: 100; pointer-events: none; }
+        .glass-icon-btn { pointer-events: auto; padding: 10px 20px; font-size: 0.75rem; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border-radius: 30px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); margin: 0; box-shadow: none; text-transform: none; font-weight: normal; letter-spacing: 1px; }
+        .glass-icon-btn:hover { background: rgba(0,0,0,0.4); color: #fff; transform: none; border-color: rgba(255,255,255,0.3); }
+
+        .scanner-laser { position: absolute; left: 0; width: 100%; height: 2px; background: #FFDF73; box-shadow: 0 0 15px #d4af37; animation: laserScan 2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate; z-index: 25; display: none; pointer-events: none; }
+        @keyframes laserScan { 0% { top: 5%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 95%; opacity: 0; } }
+
+        #scan-screen { display: none; z-index: 20; pointer-events: none; }
+        .scan-text { font-size: 1.1rem; letter-spacing: 5px; font-weight: 300; animation: pulse 2s infinite ease-in-out; text-shadow: 0 0 10px rgba(212, 175, 55, 0.6); color: #FFDF73; text-transform: uppercase; }
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+        #result-screen { display: none; align-items: center; z-index: 30; }
+        
+        .result-card { background: rgba(15, 15, 18, 0.65); border: 1px solid rgba(255, 255, 255, 0.08); padding: 40px 25px; border-radius: 32px; backdrop-filter: blur(20px) saturate(120%); -webkit-backdrop-filter: blur(20px) saturate(120%); max-width: 500px; width: 88%; margin-top: auto; margin-bottom: 5vh; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        
+        .res-subtitle { font-size: 0.7rem; letter-spacing: 4px; color: rgba(255,255,255,0.5); margin-bottom: 15px; text-transform: uppercase; font-weight: 600; }
+        .res-color-name { font-size: 2.4rem; font-weight: normal; margin-bottom: 5px; letter-spacing: 1px; }
+        .res-hz { font-family: 'Courier New', monospace; font-size: 1rem; color: rgba(255,255,255,0.9); margin-bottom: 20px; letter-spacing: 3px; }
+        
+        .bio-stats { display: flex; justify-content: space-between; margin-bottom: 25px; gap: 8px; }
+        .stat-box { flex: 1; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px 2px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; }
+        .stat-label { color: rgba(255,255,255,0.4); font-size: 0.6rem; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; font-weight: 600; text-align: center;}
+        .stat-value { font-family: 'Courier New', monospace; font-size: 1rem; font-weight: bold; }
+        
+        .res-meaning { font-size: 1rem; color: rgba(255,255,255,0.85); line-height: 1.5; font-weight: 300; margin-bottom: 25px; }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <video class="input_video" playsinline></video>
+        <canvas class="output_canvas" id="canvas"></canvas>
+        
+        <div class="top-controls">
+            <button id="btn-flip" class="glass-icon-btn">🔄 Cámara</button>
+            <button id="btn-mute" class="glass-icon-btn">🔊 Sonido: ON</button>
+        </div>
+
+        <div id="scanner-laser" class="scanner-laser"></div>
+
+        <div id="intro-screen" class="ui-layer">
+            <div class="logo-title serif-text">AuraSens</div>
+            <div class="logo-subtitle">Lectura Geométrica de Energía</div>
+            <button id="btn-start">Comenzar Sesión</button>
+        </div>
+
+        <div id="scan-screen" class="ui-layer">
+            <div class="scan-text">Calibrando Espectro...</div>
+        </div>
+
+        <div id="result-screen" class="ui-layer">
+            <div class="result-card" id="r-card">
+                <div class="res-subtitle">Sincronización Completada</div>
+                <div class="res-color-name serif-text" id="r-title">---</div>
+                <div class="res-hz" id="r-hz">--- Hz</div>
+                
+                <div class="bio-stats" id="r-stats">
+                    <div class="stat-box"><span class="stat-label">Pulso (Est)</span><span class="stat-value" id="r-bpm">--</span></div>
+                    <div class="stat-box"><span class="stat-label">Térmica</span><span class="stat-value" id="r-temp">--</span></div>
+                    <div class="stat-box"><span class="stat-label">Armonía</span><span class="stat-value" id="r-coh">--</span></div>
+                </div>
+
+                <div class="res-meaning serif-text" id="r-desc">---</div>
+                <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+                    <button id="btn-num">Guardar Análisis</button>
+                    <button id="btn-reset" style="background: transparent; border: none; font-size: 0.8rem; color: #888; box-shadow: none;">Finalizar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script type="module">
+    const videoElement = document.querySelector('.input_video');
+    const canvasElement = document.querySelector('.output_canvas');
+    const canvasCtx = canvasElement.getContext('2d');
+    
+    const introScreen = document.getElementById('intro-screen');
+    const scanScreen = document.getElementById('scan-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const btnStart = document.getElementById('btn-start');
+    const btnReset = document.getElementById('btn-reset');
+    const btnNum = document.getElementById('btn-num');
+    const btnMute = document.getElementById('btn-mute');
+    const btnFlip = document.getElementById('btn-flip');
+    const scannerLaser = document.getElementById('scanner-laser'); 
+    
+    const rCard = document.getElementById('r-card');
+    const rTitle = document.getElementById('r-title');
+    const rHz = document.getElementById('r-hz');
+    const rDesc = document.getElementById('r-desc');
+    const rBpm = document.getElementById('r-bpm');
+    const rTemp = document.getElementById('r-temp');
+    const rCoh = document.getElementById('r-coh');
+
+    let appState = 'intro'; 
+    let finalAuraData = null; 
+    let finalBioStats = null;
+    let facingMode = 'user'; // 'user' = selfie, 'environment' = trasera
+    let cameraActive = null;
+
+    // --- LÓGICA DE CÁMARA OPTIMIZADA ---
+    async function startCamera() {
+        if (cameraActive) await cameraActive.stop();
+        // Efecto espejo solo si es cámara frontal
+        canvasElement.style.transform = (facingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
+        
+        cameraActive = new Camera(videoElement, {
+            onFrame: async () => { await faceMesh.send({image: videoElement}); },
+            width: 640, height: 480, // Resolución más ligera para móviles
+            facingMode: facingMode
+        });
+        cameraActive.start();
+    }
+
+    btnFlip.addEventListener('click', () => {
+        facingMode = (facingMode === 'user') ? 'environment' : 'user';
+        startCamera();
+    });
+
+    // --- FÍSICA Y ENTORNO ESPACIAL OPTIMIZADO (Menos partículas = Mejor rendimiento) ---
+    let lastFaceX = null; let lastFaceY = null; let windX = 0; let windY = 0; let targetWindX = 0; let targetWindY = 0;
+
+    let particles = [];
+    for(let i = 0; i < 30; i++) { // Reducido de 60 a 30
+        particles.push({
+            x: Math.random(), y: Math.random(), size: Math.random() * 2 + 0.5,
+            speedY: -(Math.random() * 0.003 + 0.001), speedX: (Math.random() - 0.5) * 0.001, 
+            opacity: Math.random() * 0.5 + 0.1
+        });
+    }
+
+    let petals = [];
+    for(let i = 0; i < 15; i++) { // Reducido de 35 a 15
+        petals.push({
+            x: Math.random(), y: Math.random(), size: Math.random() * 5 + 3, 
+            speedY: Math.random() * 0.002 + 0.002, speedX: (Math.random() - 0.5) * 0.001, 
+            rotation: Math.random() * Math.PI * 2, rotSpeed: (Math.random() - 0.5) * 0.03, opacity: Math.random() * 0.4 + 0.3
+        });
+    }
+
+    function updateAndDrawEnvironment(color) {
+        canvasCtx.save();
+        targetWindX *= 0.85; targetWindY *= 0.85; windX += (targetWindX - windX) * 0.1; windY += (targetWindY - windY) * 0.1;
+
+        canvasCtx.fillStyle = color;
+        particles.forEach(p => {
+            p.y += p.speedY + windY * 0.5; p.x += p.speedX + windX * 0.5;
+            if(p.y < -0.1) p.y = 1.1; if(p.y > 1.1) p.y = -0.1; if(p.x < -0.1) p.x = 1.1; if(p.x > 1.1) p.x = -0.1;
+            canvasCtx.globalAlpha = p.opacity; canvasCtx.beginPath(); canvasCtx.arc(p.x * canvasElement.width, p.y * canvasElement.height, p.size, 0, Math.PI * 2); canvasCtx.fill();
+        });
+
+        let petalColor = (appState === 'result' && finalAuraData) ? finalAuraData.color : '#ffb7c5'; 
+        petals.forEach(p => {
+            p.y += p.speedY + windY; p.x += p.speedX + windX; p.rotation += p.rotSpeed + (windX * 5); 
+            if(p.y > 1.1) p.y = -0.1; if(p.y < -0.1) p.y = 1.1; if(p.x < -0.1) p.x = 1.1; if(p.x > 1.1) p.x = -0.1;
+            canvasCtx.save(); canvasCtx.translate(p.x * canvasElement.width, p.y * canvasElement.height); canvasCtx.rotate(p.rotation);
+            canvasCtx.globalAlpha = p.opacity; canvasCtx.fillStyle = petalColor;
+            canvasCtx.beginPath(); canvasCtx.moveTo(0, -p.size); canvasCtx.quadraticCurveTo(p.size, 0, 0, p.size); canvasCtx.quadraticCurveTo(-p.size, 0, 0, -p.size); canvasCtx.fill(); canvasCtx.restore();
+        });
+        canvasCtx.restore();
+    }
+
+    // --- MOTOR DE AUDIO ---
+    let audioCtx; let masterGain; let activeOscillators = []; let activeGains = []; let isMuted = false;
+    function initAudio() {
+        if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); masterGain = audioCtx.createGain(); masterGain.connect(audioCtx.destination); masterGain.gain.value = isMuted ? 0 : 1; }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+    btnMute.addEventListener('click', () => {
+        isMuted = !isMuted;
+        if (isMuted) { btnMute.innerText = "🔇 Sonido: OFF"; if (masterGain) { masterGain.gain.cancelScheduledValues(audioCtx.currentTime); masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5); } } 
+        else { btnMute.innerText = "🔊 Sonido: ON"; initAudio(); if (masterGain) { masterGain.gain.cancelScheduledValues(audioCtx.currentTime); masterGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 0.5); } }
+    });
+    function playTone(freq, type = 'sine', volume = 0.1, detune = 0) {
+        const osc = audioCtx.createOscillator(); const gainNode = audioCtx.createGain();
+        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime); osc.detune.setValueAtTime(detune, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime); gainNode.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + 2);
+        osc.connect(gainNode); gainNode.connect(masterGain); osc.start(); activeOscillators.push(osc); activeGains.push(gainNode);
+    }
+    function playScanningSound() { stopAudio(); initAudio(); playTone(110, 'sine', 0.05); playTone(112, 'sine', 0.05); }
+    function playAuraFrequency(freq) { stopAudio(); initAudio(); playTone(freq, 'sine', 0.08); playTone(freq + 1.5, 'sine', 0.06); playTone(freq / 2, 'triangle', 0.03); }
+    function stopAudio() {
+        if (audioCtx && activeGains.length > 0) {
+            const now = audioCtx.currentTime; const gainsToStop = [...activeGains]; const oscsToStop = [...activeOscillators]; activeGains = []; activeOscillators = [];
+            gainsToStop.forEach(gain => { gain.gain.cancelScheduledValues(now); gain.gain.setValueAtTime(gain.gain.value, now); gain.gain.linearRampToValueAtTime(0, now + 1); });
+            setTimeout(() => { oscsToStop.forEach(osc => { try { osc.stop(); } catch(e){} }); }, 1000);
+        }
+    }
+
+    const oracleDictionary = [
+        { maxHue: 20, name: "Fuego Creativo", color: "#FF3300", hz: 417, desc: "Disuelve bloqueos y despierta el instinto. Tu aura es acción y fuerza vital." },
+        { maxHue: 45, name: "Ámbar Solar", color: "#FFB020", hz: 432, desc: "Sintonía natural. Irradias calidez, magnetismo y profunda creatividad." },
+        { maxHue: 75, name: "Tierra Fértil", color: "#FFDF73", hz: 528, desc: "Tono Milagroso. Tu energía atrae abundancia, prosperidad y luz." },
+        { maxHue: 110, name: "Jade Renacimiento", color: "#ADFF2F", hz: 582, desc: "Conexión con ciclos naturales. Estás en un periodo de vitalidad profunda." },
+        { maxHue: 150, name: "Sanación Esmeralda", color: "#00FF7F", hz: 639, desc: "Armoniza relaciones. Tu chakra corazón actúa como bálsamo energético." },
+        { maxHue: 180, name: "Turquesa Cristalino", color: "#40E0D0", hz: 685, desc: "Claridad mental absoluta. Tu campo purifica el ambiente y facilita la verdad." },
+        { maxHue: 215, name: "Agua Profunda", color: "#4DA6FF", hz: 741, desc: "Limpia toxinas emocionales. Eres un mar de intuición y expresión pura." },
+        { maxHue: 250, name: "Zafiro Cósmico", color: "#5C5CFF", hz: 777, desc: "Expansión de consciencia. Estás anclando sabiduría superior y calma." },
+        { maxHue: 280, name: "Índigo Despierto", color: "#8A2BE2", hz: 852, desc: "Activa el Tercer Ojo. Tu percepción espiritual es aguda y profunda." },
+        { maxHue: 315, name: "Éter Místico", color: "#B366FF", hz: 888, desc: "Abundancia del universo. Tu aura transmuta la energía densa en luz." },
+        { maxHue: 345, name: "Llama Magenta", color: "#FF4DFF", hz: 963, desc: "Conexión Divina. Vibras en un estado de unidad y amor incondicional." },
+        { maxHue: 360, name: "Rosa Cuarzo", color: "#FF66B2", hz: 999, desc: "Culminación y ascensión. Tu campo energético es pura compasión y gracia." }
+    ];
+    function getAuraMeaning(hue) { for (let i = 0; i < oracleDictionary.length; i++) { if (hue <= oracleDictionary[i].maxHue) return oracleDictionary[i]; } return oracleDictionary[0]; }
+
+    btnStart.addEventListener('click', () => {
+        appState = 'scanning'; introScreen.style.opacity = '0'; playScanningSound(); 
+        setTimeout(() => { introScreen.style.display = 'none'; scanScreen.style.display = 'flex'; scannerLaser.style.display = 'block'; }, 500);
+        setTimeout(() => {
+            appState = 'result'; scanScreen.style.display = 'none'; scannerLaser.style.display = 'none'; resultScreen.style.display = 'flex';
+            rTitle.innerText = finalAuraData.name; rTitle.style.color = finalAuraData.color;
+            rHz.innerText = `[ Freq: ${finalAuraData.hz} Hz ]`; rHz.style.color = finalAuraData.color;
+            rDesc.innerText = finalAuraData.desc;
+            rBpm.innerText = `${finalBioStats.bpm}`; rTemp.innerText = `${finalBioStats.temp}°C`; rCoh.innerText = `${finalBioStats.coherence}%`;
+            rBpm.style.color = finalAuraData.color; rTemp.style.color = finalAuraData.color; rCoh.style.color = finalAuraData.color;
+            rCard.style.boxShadow = `0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 60px ${finalAuraData.color}22`;
+            playAuraFrequency(finalAuraData.hz); 
+        }, 3500);
+    });
+
+    btnReset.addEventListener('click', () => {
+        appState = 'intro'; resultScreen.style.display = 'none'; scannerLaser.style.display = 'none'; 
+        introScreen.style.display = 'flex'; introScreen.style.opacity = '1';
+        finalAuraData = null; finalBioStats = null; stopAudio(); 
+    });
+
+    btnNum.addEventListener('click', () => {
+        setTimeout(() => {
+            const tempCanvas = document.createElement('canvas'); tempCanvas.width = canvasElement.width; tempCanvas.height = canvasElement.height; const tempCtx = tempCanvas.getContext('2d');
+            
+            // Lógica para que la descarga NO salga invertida si se usó la cámara frontal
+            if(facingMode === 'user') { tempCtx.translate(tempCanvas.width, 0); tempCtx.scale(-1, 1); }
+            
+            tempCtx.drawImage(canvasElement, 0, 0); tempCtx.setTransform(1, 0, 0, 1, 0, 0); 
+            drawInfographicOverlay(tempCtx, finalAuraData, finalBioStats, tempCanvas.width, tempCanvas.height);
+            const dataURL = tempCanvas.toDataURL('image/png'); const link = document.createElement('a');
+            link.download = `AuraSens_Reporte_${finalAuraData.name.replace(/ /g, '_')}.png`; link.href = dataURL; link.click();
+        }, 50);
+    });
+
+    function drawInfographicOverlay(ctx, data, stats, width, height) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(15, 15, 18, 0.85)'; ctx.fillRect(0, height - 260, width, 260);
+        ctx.strokeStyle = data.color + '66'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, height - 260); ctx.lineTo(width, height - 260); ctx.stroke();
+        
+        ctx.font = 'normal 42px Garamond'; ctx.fillStyle = data.color; ctx.textAlign = 'center'; ctx.fillText(data.name, width / 2, height - 190);
+        ctx.font = '300 16px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.fillText(`FRECUENCIA RESONANTE: ${data.hz} HZ`, width / 2, height - 155);
+        
+        ctx.font = '500 14px Courier New'; ctx.fillStyle = data.color;
+        ctx.fillText(`PULSO: ${stats.bpm} BPM`, width / 2 - 180, height - 115); ctx.fillText(`TEMP: ${stats.temp} °C`, width / 2, height - 115); ctx.fillText(`COHERENCIA: ${stats.coherence}%`, width / 2 + 180, height - 115);
+        
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(width / 2 - 200, height - 90); ctx.lineTo(width / 2 + 200, height - 90); ctx.stroke();
+        
+        ctx.font = 'italic 18px Garamond'; ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fillText(data.desc, width / 2, height - 55);
+        ctx.font = '300 12px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.letterSpacing = "2px"; ctx.fillText("A U R A S E N S   |   B I O F E E D B A C K", width / 2, height - 20);
+        ctx.restore();
+    }
+
+    function onResults(results) {
+        canvasElement.width = videoElement.videoWidth; canvasElement.height = videoElement.videoHeight;
+        canvasCtx.save(); canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+        
+        // Optimización de fondo: FillRect simple en lugar de Gradient pesado cada frame
+        let alphaLevel = (appState === 'scanning') ? 0.4 : (appState === 'result' ? 0.75 : 0.25);
+        canvasCtx.fillStyle = `rgba(10, 10, 15, ${alphaLevel})`; 
+        canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+
+        if (results.multiFaceLandmarks && results.multiFaceLandmarks[0]) {
+            const face = results.multiFaceLandmarks[0];
+            const currentFaceX = face[1].x; const currentFaceY = face[1].y;
+            if (lastFaceX !== null) { let dx = -(currentFaceX - lastFaceX); let dy = (currentFaceY - lastFaceY); targetWindX = dx * 1.5; targetWindY = dy * 1.5; }
+            lastFaceX = currentFaceX; lastFaceY = currentFaceY;
+
+            // Optimización: Cálculo sin requerir "refineLandmarks" (Puntos estándar 33 y 263 en lugar de 468/473)
+            const eyeDist = Math.hypot(face[33].x - face[263].x, face[33].y - face[263].y); 
+            const jawWidth = Math.hypot(face[132].x - face[361].x, face[132].y - face[361].y); 
+            const noseLen = Math.hypot(face[168].x - face[2].x, face[168].y - face[2].y); 
+            const mouthOpen = Math.hypot(face[13].x - face[14].x, face[13].y - face[14].y); 
+            
+            const bioHash = (eyeDist * 31337) + (jawWidth * 71993) + (noseLen * 104729) + (mouthOpen * 50021);
+            let hue = Math.floor(bioHash) % 360;
+            
+            if (appState === 'scanning') {
+                finalAuraData = getAuraMeaning(hue);
+                finalBioStats = { bpm: 60 + (Math.floor(bioHash) % 35), temp: (36.1 + ((Math.floor(bioHash) % 12) / 10)).toFixed(1), coherence: 75 + (Math.floor(bioHash) % 24) };
+            }
+
+            let currentAura = (appState === 'result' && finalAuraData) ? finalAuraData : getAuraMeaning(hue);
+            let drawColor = currentAura.color;
+
+            updateAndDrawEnvironment(drawColor);
+
+            const FACIAL_OUTLINE = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
+            canvasCtx.beginPath();
+            FACIAL_OUTLINE.forEach((index, i) => { const pt = face[index]; if (i === 0) canvasCtx.moveTo(pt.x * canvasElement.width, pt.y * canvasElement.height); else canvasCtx.lineTo(pt.x * canvasElement.width, pt.y * canvasElement.height); });
+            canvasCtx.closePath();
+
+            // Sombra reducida para no saturar móviles
+            canvasCtx.shadowBlur = (appState === 'result') ? 20 : 10; canvasCtx.shadowColor = drawColor; canvasCtx.strokeStyle = drawColor; canvasCtx.lineWidth = (appState === 'result') ? 6 : 3; canvasCtx.stroke(); canvasCtx.shadowBlur = 0;
+
+            // Malla más ligera: dibujando menos líneas (i+=11 en lugar de i+=7)
+            canvasCtx.lineWidth = 0.5; canvasCtx.strokeStyle = drawColor + "66"; canvasCtx.beginPath();
+            for (let i = 0; i < face.length - 15; i += 11) { canvasCtx.moveTo(face[i].x * canvasElement.width, face[i].y * canvasElement.height); canvasCtx.lineTo(face[i+4].x * canvasElement.width, face[i+4].y * canvasElement.height); canvasCtx.lineTo(face[i+8].x * canvasElement.width, face[i+8].y * canvasElement.height); }
+            canvasCtx.stroke();
+        } else {
+            targetWindX = 0; targetWindY = 0; updateAndDrawEnvironment('#FFDF73');
+        }
+        canvasCtx.restore();
+    }
+
+    const faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
+    // ¡Clave para rendimiento en móviles! refineLandmarks apagado
+    faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: false, minDetectionConfidence: 0.6 });
+    faceMesh.onResults(onResults);
+    
+    startCamera(); // Inicia con cámara frontal por defecto
+</script>
+</body>
+</html>
