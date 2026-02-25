@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>AuraSens - Versión Móvil Optimizada (Textos Grandes)</title>
+    <title>AuraSens - Captura Vertical Premium</title>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 
@@ -19,16 +19,13 @@
         
         #intro-screen { background: rgba(10, 10, 12, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 10; }
         
-        /* --- TAMAÑOS AUMENTADOS UN 30% --- */
         .logo-title { font-size: clamp(4.5rem, 15vw, 6.5rem); letter-spacing: 4px; margin-bottom: 5px; text-transform: uppercase; background: linear-gradient(135deg, #FFDF73 0%, #d4af37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 4px 15px rgba(212, 175, 55, 0.3)); }
         .logo-subtitle { font-size: clamp(1.4rem, 5vw, 1.7rem); letter-spacing: 3px; color: rgba(255, 255, 255, 0.9); margin-bottom: 50px; font-weight: 300; text-transform: uppercase; }
         
-        /* Botón más grande */
         button { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(212, 175, 55, 0.4); color: #FFDF73; padding: 22px 40px; font-size: 1.3rem; letter-spacing: 2px; cursor: pointer; transition: all 0.4s ease; text-transform: uppercase; border-radius: 50px; margin: 10px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); font-weight: 600; width: 85%; max-width: 350px;}
         button:hover { background: rgba(212, 175, 55, 0.15); border-color: #FFDF73; box-shadow: 0 8px 32px 0 rgba(212, 175, 55, 0.2), inset 0 0 15px rgba(212, 175, 55, 0.1); transform: translateY(-2px); color: #fff; }
-        #btn-num { background: rgba(212, 175, 55, 0.15); font-weight: bold; color: #fff; border: 1px solid rgba(212, 175, 55, 0.6); padding: 18px 30px; font-size: 1.1rem; } /* Botón final un poco más proporcionado */
+        #btn-num { background: rgba(212, 175, 55, 0.15); font-weight: bold; color: #fff; border: 1px solid rgba(212, 175, 55, 0.6); padding: 18px 30px; font-size: 1.1rem; }
 
-        /* Controles superiores */
         .top-controls { position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-between; padding: 0 15px; box-sizing: border-box; z-index: 100; pointer-events: none; }
         .glass-icon-btn { pointer-events: auto; padding: 12px 18px; font-size: 0.95rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.9); border-radius: 30px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); margin: 0; box-shadow: none; text-transform: none; font-weight: 500; letter-spacing: 1px; width: auto; }
         .glass-icon-btn:hover { background: rgba(0,0,0,0.6); color: #fff; transform: none; border-color: rgba(255,255,255,0.4); }
@@ -128,6 +125,7 @@
     let finalBioStats = null;
     let facingMode = 'user'; 
     let cameraActive = null;
+    let scanSamples = [];
 
     async function startCamera() {
         if (cameraActive) await cameraActive.stop();
@@ -147,35 +145,18 @@
     });
 
     let lastFaceX = null; let lastFaceY = null; let windX = 0; let windY = 0; let targetWindX = 0; let targetWindY = 0;
-
-    let particles = [];
-    for(let i = 0; i < 30; i++) { 
-        particles.push({
-            x: Math.random(), y: Math.random(), size: Math.random() * 2 + 0.5,
-            speedY: -(Math.random() * 0.003 + 0.001), speedX: (Math.random() - 0.5) * 0.001, opacity: Math.random() * 0.5 + 0.1
-        });
-    }
-
-    let petals = [];
-    for(let i = 0; i < 15; i++) { 
-        petals.push({
-            x: Math.random(), y: Math.random(), size: Math.random() * 5 + 3, 
-            speedY: Math.random() * 0.002 + 0.002, speedX: (Math.random() - 0.5) * 0.001, 
-            rotation: Math.random() * Math.PI * 2, rotSpeed: (Math.random() - 0.5) * 0.03, opacity: Math.random() * 0.4 + 0.3
-        });
-    }
+    let particles = []; for(let i = 0; i < 30; i++) particles.push({ x: Math.random(), y: Math.random(), size: Math.random() * 2 + 0.5, speedY: -(Math.random() * 0.003 + 0.001), speedX: (Math.random() - 0.5) * 0.001, opacity: Math.random() * 0.5 + 0.1 });
+    let petals = []; for(let i = 0; i < 15; i++) petals.push({ x: Math.random(), y: Math.random(), size: Math.random() * 5 + 3, speedY: Math.random() * 0.002 + 0.002, speedX: (Math.random() - 0.5) * 0.001, rotation: Math.random() * Math.PI * 2, rotSpeed: (Math.random() - 0.5) * 0.03, opacity: Math.random() * 0.4 + 0.3 });
 
     function updateAndDrawEnvironment(color) {
         canvasCtx.save();
         targetWindX *= 0.85; targetWindY *= 0.85; windX += (targetWindX - windX) * 0.1; windY += (targetWindY - windY) * 0.1;
-
         canvasCtx.fillStyle = color;
         particles.forEach(p => {
             p.y += p.speedY + windY * 0.5; p.x += p.speedX + windX * 0.5;
             if(p.y < -0.1) p.y = 1.1; if(p.y > 1.1) p.y = -0.1; if(p.x < -0.1) p.x = 1.1; if(p.x > 1.1) p.x = -0.1;
             canvasCtx.globalAlpha = p.opacity; canvasCtx.beginPath(); canvasCtx.arc(p.x * canvasElement.width, p.y * canvasElement.height, p.size, 0, Math.PI * 2); canvasCtx.fill();
         });
-
         let petalColor = (appState === 'result' && finalAuraData) ? finalAuraData.color : '#ffb7c5'; 
         petals.forEach(p => {
             p.y += p.speedY + windY; p.x += p.speedX + windX; p.rotation += p.rotSpeed + (windX * 5); 
@@ -188,30 +169,12 @@
     }
 
     let audioCtx; let masterGain; let activeOscillators = []; let activeGains = []; let isMuted = false;
-    function initAudio() {
-        if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); masterGain = audioCtx.createGain(); masterGain.connect(audioCtx.destination); masterGain.gain.value = isMuted ? 0 : 1; }
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-    }
-    btnMute.addEventListener('click', () => {
-        isMuted = !isMuted;
-        if (isMuted) { btnMute.innerText = "🔇 Sonido: OFF"; if (masterGain) { masterGain.gain.cancelScheduledValues(audioCtx.currentTime); masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5); } } 
-        else { btnMute.innerText = "🔊 Sonido: ON"; initAudio(); if (masterGain) { masterGain.gain.cancelScheduledValues(audioCtx.currentTime); masterGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 0.5); } }
-    });
-    function playTone(freq, type = 'sine', volume = 0.1, detune = 0) {
-        const osc = audioCtx.createOscillator(); const gainNode = audioCtx.createGain();
-        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime); osc.detune.setValueAtTime(detune, audioCtx.currentTime);
-        gainNode.gain.setValueAtTime(0, audioCtx.currentTime); gainNode.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + 2);
-        osc.connect(gainNode); gainNode.connect(masterGain); osc.start(); activeOscillators.push(osc); activeGains.push(gainNode);
-    }
+    function initAudio() { if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); masterGain = audioCtx.createGain(); masterGain.connect(audioCtx.destination); masterGain.gain.value = isMuted ? 0 : 1; } if (audioCtx.state === 'suspended') audioCtx.resume(); }
+    btnMute.addEventListener('click', () => { isMuted = !isMuted; if (isMuted) { btnMute.innerText = "🔇 Sonido: OFF"; if (masterGain) masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5); } else { btnMute.innerText = "🔊 Sonido: ON"; initAudio(); if (masterGain) masterGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 0.5); } });
+    function playTone(freq, type = 'sine', volume = 0.1, detune = 0) { const osc = audioCtx.createOscillator(); const gainNode = audioCtx.createGain(); osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime); osc.detune.setValueAtTime(detune, audioCtx.currentTime); gainNode.gain.setValueAtTime(0, audioCtx.currentTime); gainNode.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + 2); osc.connect(gainNode); gainNode.connect(masterGain); osc.start(); activeOscillators.push(osc); activeGains.push(gainNode); }
     function playScanningSound() { stopAudio(); initAudio(); playTone(110, 'sine', 0.05); playTone(112, 'sine', 0.05); }
     function playAuraFrequency(freq) { stopAudio(); initAudio(); playTone(freq, 'sine', 0.08); playTone(freq + 1.5, 'sine', 0.06); playTone(freq / 2, 'triangle', 0.03); }
-    function stopAudio() {
-        if (audioCtx && activeGains.length > 0) {
-            const now = audioCtx.currentTime; const gainsToStop = [...activeGains]; const oscsToStop = [...activeOscillators]; activeGains = []; activeOscillators = [];
-            gainsToStop.forEach(gain => { gain.gain.cancelScheduledValues(now); gain.gain.setValueAtTime(gain.gain.value, now); gain.gain.linearRampToValueAtTime(0, now + 1); });
-            setTimeout(() => { oscsToStop.forEach(osc => { try { osc.stop(); } catch(e){} }); }, 1000);
-        }
-    }
+    function stopAudio() { if (audioCtx && activeGains.length > 0) { const now = audioCtx.currentTime; const gainsToStop = [...activeGains]; const oscsToStop = [...activeOscillators]; activeGains = []; activeOscillators = []; gainsToStop.forEach(gain => { gain.gain.cancelScheduledValues(now); gain.gain.setValueAtTime(gain.gain.value, now); gain.gain.linearRampToValueAtTime(0, now + 1); }); setTimeout(() => { oscsToStop.forEach(osc => { try { osc.stop(); } catch(e){} }); }, 1000); } }
 
     const oracleDictionary = [
         { maxHue: 20, name: "Fuego Creativo", color: "#FF3300", hz: 417, desc: "Disuelve bloqueos y despierta el instinto. Tu aura es acción y fuerza vital." },
@@ -230,10 +193,18 @@
     function getAuraMeaning(hue) { for (let i = 0; i < oracleDictionary.length; i++) { if (hue <= oracleDictionary[i].maxHue) return oracleDictionary[i]; } return oracleDictionary[0]; }
 
     btnStart.addEventListener('click', () => {
-        appState = 'scanning'; introScreen.style.opacity = '0'; playScanningSound(); 
+        appState = 'scanning'; scanSamples = []; introScreen.style.opacity = '0'; playScanningSound(); 
         setTimeout(() => { introScreen.style.display = 'none'; scanScreen.style.display = 'flex'; scannerLaser.style.display = 'block'; }, 500);
         setTimeout(() => {
             appState = 'result'; scanScreen.style.display = 'none'; scannerLaser.style.display = 'none'; resultScreen.style.display = 'flex';
+            if(scanSamples.length > 0) {
+                let sumR1 = 0, sumR2 = 0; scanSamples.forEach(s => { sumR1 += s.r1; sumR2 += s.r2; });
+                let avgR1 = sumR1 / scanSamples.length; let avgR2 = sumR2 / scanSamples.length;
+                let boxX = Math.round(avgR1 * 14); let boxY = Math.round(avgR2 * 14);
+                let hash = (boxX * 67) + (boxY * 123); let hue = hash % 360;
+                finalAuraData = getAuraMeaning(hue);
+                finalBioStats = { bpm: 60 + (hash % 35), temp: (36.1 + ((hash % 12) / 10)).toFixed(1), coherence: 75 + (hash % 24) };
+            }
             rTitle.innerText = finalAuraData.name; rTitle.style.color = finalAuraData.color;
             rHz.innerText = `[ Freq: ${finalAuraData.hz} Hz ]`; rHz.style.color = finalAuraData.color;
             rDesc.innerText = finalAuraData.desc;
@@ -250,34 +221,105 @@
         finalAuraData = null; finalBioStats = null; stopAudio(); 
     });
 
+    // SISTEMA DE RENDERIZADO VERTICAL 9:16 (Calidad de Historia de Instagram 1080x1920)
     btnNum.addEventListener('click', () => {
         setTimeout(() => {
-            const tempCanvas = document.createElement('canvas'); tempCanvas.width = canvasElement.width; tempCanvas.height = canvasElement.height; const tempCtx = tempCanvas.getContext('2d');
+            const tempCanvas = document.createElement('canvas');
+            const expWidth = 1080;
+            const expHeight = 1920;
+            tempCanvas.width = expWidth;
+            tempCanvas.height = expHeight;
+            const tempCtx = tempCanvas.getContext('2d');
             
-            if(facingMode === 'user') { tempCtx.translate(tempCanvas.width, 0); tempCtx.scale(-1, 1); }
+            // Lógica de recorte para centrar la cámara (Object-fit: cover real)
+            const srcRatio = canvasElement.width / canvasElement.height;
+            const expRatio = expWidth / expHeight;
+            let drawWidth, drawHeight, drawX, drawY;
+
+            if (srcRatio > expRatio) {
+                // El video es más ancho que la plantilla vertical
+                drawHeight = expHeight;
+                drawWidth = canvasElement.width * (expHeight / canvasElement.height);
+                drawX = (expWidth - drawWidth) / 2; // Centrar horizontalmente
+                drawY = 0;
+            } else {
+                drawWidth = expWidth;
+                drawHeight = canvasElement.height * (expWidth / canvasElement.width);
+                drawX = 0;
+                drawY = (expHeight - drawHeight) / 2; // Centrar verticalmente
+            }
             
-            tempCtx.drawImage(canvasElement, 0, 0); tempCtx.setTransform(1, 0, 0, 1, 0, 0); 
-            drawInfographicOverlay(tempCtx, finalAuraData, finalBioStats, tempCanvas.width, tempCanvas.height);
-            const dataURL = tempCanvas.toDataURL('image/png'); const link = document.createElement('a');
-            link.download = `AuraSens_Reporte_${finalAuraData.name.replace(/ /g, '_')}.png`; link.href = dataURL; link.click();
+            tempCtx.save();
+            if(facingMode === 'user') { 
+                tempCtx.translate(expWidth, 0); 
+                tempCtx.scale(-1, 1); 
+            }
+            
+            // Dibujar video original recortado
+            tempCtx.drawImage(canvasElement, drawX, drawY, drawWidth, drawHeight);
+            tempCtx.restore();
+
+            drawInfographicOverlay(tempCtx, finalAuraData, finalBioStats, expWidth, expHeight);
+            
+            const dataURL = tempCanvas.toDataURL('image/jpeg', 0.9); // JPEG para descargar más rápido
+            const link = document.createElement('a');
+            link.download = `AuraSens_IG_Story_${finalAuraData.name.replace(/ /g, '_')}.jpg`; 
+            link.href = dataURL; link.click();
         }, 50);
     });
 
+    // TEXTOS ENORMES PARA LA EXPORTACIÓN DE 1080x1920
     function drawInfographicOverlay(ctx, data, stats, width, height) {
         ctx.save();
-        ctx.fillStyle = 'rgba(15, 15, 18, 0.85)'; ctx.fillRect(0, height - 260, width, 260);
-        ctx.strokeStyle = data.color + '66'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, height - 260); ctx.lineTo(width, height - 260); ctx.stroke();
+        const panelHeight = 550;
+        const panelY = height - panelHeight;
+
+        // Fondo oscuro elegante para legibilidad
+        ctx.fillStyle = 'rgba(15, 15, 18, 0.9)'; 
+        ctx.fillRect(0, panelY, width, panelHeight);
         
-        ctx.font = 'normal 42px Garamond'; ctx.fillStyle = data.color; ctx.textAlign = 'center'; ctx.fillText(data.name, width / 2, height - 190);
-        ctx.font = '300 16px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.fillText(`FRECUENCIA RESONANTE: ${data.hz} HZ`, width / 2, height - 155);
+        ctx.strokeStyle = data.color + '88'; 
+        ctx.lineWidth = 4; 
+        ctx.beginPath(); 
+        ctx.moveTo(0, panelY); 
+        ctx.lineTo(width, panelY); 
+        ctx.stroke();
         
-        ctx.font = '500 14px Courier New'; ctx.fillStyle = data.color;
-        ctx.fillText(`PULSO: ${stats.bpm} BPM`, width / 2 - 180, height - 115); ctx.fillText(`TEMP: ${stats.temp} °C`, width / 2, height - 115); ctx.fillText(`COHERENCIA: ${stats.coherence}%`, width / 2 + 180, height - 115);
+        // Título del Color
+        ctx.font = 'normal 90px Garamond'; 
+        ctx.fillStyle = data.color; 
+        ctx.textAlign = 'center'; 
+        ctx.fillText(data.name, width / 2, panelY + 130);
         
-        ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(width / 2 - 200, height - 90); ctx.lineTo(width / 2 + 200, height - 90); ctx.stroke();
+        // Frecuencia
+        ctx.font = '300 32px sans-serif'; 
+        ctx.fillStyle = 'rgba(255,255,255,0.9)'; 
+        ctx.fillText(`FRECUENCIA RESONANTE: ${data.hz} HZ`, width / 2, panelY + 190);
         
-        ctx.font = 'italic 18px Garamond'; ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fillText(data.desc, width / 2, height - 55);
-        ctx.font = '300 12px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.letterSpacing = "2px"; ctx.fillText("A U R A S E N S   |   B I O F E E D B A C K", width / 2, height - 20);
+        // Datos biométricos
+        ctx.font = 'bold 32px Courier New'; 
+        ctx.fillStyle = data.color;
+        ctx.fillText(`PULSO: ${stats.bpm} BPM`, width / 2 - 300, panelY + 280); 
+        ctx.fillText(`TEMP: ${stats.temp} °C`, width / 2, panelY + 280); 
+        ctx.fillText(`COHERENCIA: ${stats.coherence}%`, width / 2 + 300, panelY + 280);
+        
+        // Línea divisora
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)'; 
+        ctx.lineWidth = 2; 
+        ctx.beginPath(); 
+        ctx.moveTo(width / 2 - 400, panelY + 340); 
+        ctx.lineTo(width / 2 + 400, panelY + 340); 
+        ctx.stroke();
+        
+        // Descripción (Usando max-width de 950px para que no toque los bordes)
+        ctx.font = 'italic 38px Garamond'; 
+        ctx.fillStyle = 'rgba(255,255,255,0.8)'; 
+        ctx.fillText(data.desc, width / 2, panelY + 410, 950);
+        
+        // Footer del Salón
+        ctx.font = '300 24px sans-serif'; 
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; 
+        ctx.fillText("A U R A S E N S   |   B I O F E E D B A C K", width / 2, panelY + 490);
         ctx.restore();
     }
 
@@ -298,20 +340,12 @@
 
             const eyeDist = Math.hypot(face[33].x - face[263].x, face[33].y - face[263].y); 
             const jawWidth = Math.hypot(face[132].x - face[361].x, face[132].y - face[361].y); 
-            const noseLen = Math.hypot(face[168].x - face[2].x, face[168].y - face[2].y); 
-            const mouthOpen = Math.hypot(face[13].x - face[14].x, face[13].y - face[14].y); 
+            const faceHeight = Math.hypot(face[10].x - face[152].x, face[10].y - face[152].y);
+            const ratio1 = eyeDist / faceHeight; const ratio2 = jawWidth / faceHeight;
             
-            const bioHash = (eyeDist * 31337) + (jawWidth * 71993) + (noseLen * 104729) + (mouthOpen * 50021);
-            let hue = Math.floor(bioHash) % 360;
-            
-            if (appState === 'scanning') {
-                finalAuraData = getAuraMeaning(hue);
-                finalBioStats = { bpm: 60 + (Math.floor(bioHash) % 35), temp: (36.1 + ((Math.floor(bioHash) % 12) / 10)).toFixed(1), coherence: 75 + (Math.floor(bioHash) % 24) };
-            }
+            if (appState === 'scanning') { scanSamples.push({r1: ratio1, r2: ratio2}); }
 
-            let currentAura = (appState === 'result' && finalAuraData) ? finalAuraData : getAuraMeaning(hue);
-            let drawColor = currentAura.color;
-
+            let drawColor = (appState === 'result' && finalAuraData) ? finalAuraData.color : '#FFDF73';
             updateAndDrawEnvironment(drawColor);
 
             const FACIAL_OUTLINE = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
