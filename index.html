@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>AuraSens - Versión Móvil Optimizada</title>
+    <title>AuraSens - Versión Móvil Optimizada (Textos Grandes)</title>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 
@@ -13,46 +13,47 @@
 
         #container { position: relative; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
         .input_video { display: none; }
-        /* El espejado ahora lo controla JS dependiendo de la cámara */
         .output_canvas { width: 100vw; height: 100vh; object-fit: cover; } 
 
         .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); text-align: center; }
         
         #intro-screen { background: rgba(10, 10, 12, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 10; }
         
-        .logo-title { font-size: 4rem; letter-spacing: 6px; margin-bottom: 5px; text-transform: uppercase; background: linear-gradient(135deg, #FFDF73 0%, #d4af37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 4px 15px rgba(212, 175, 55, 0.3)); }
-        .logo-subtitle { font-size: 1rem; letter-spacing: 4px; color: rgba(255, 255, 255, 0.8); margin-bottom: 60px; font-weight: 300; text-transform: uppercase; }
+        /* --- TAMAÑOS AUMENTADOS UN 30% --- */
+        .logo-title { font-size: clamp(4.5rem, 15vw, 6.5rem); letter-spacing: 4px; margin-bottom: 5px; text-transform: uppercase; background: linear-gradient(135deg, #FFDF73 0%, #d4af37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 4px 15px rgba(212, 175, 55, 0.3)); }
+        .logo-subtitle { font-size: clamp(1.4rem, 5vw, 1.7rem); letter-spacing: 3px; color: rgba(255, 255, 255, 0.9); margin-bottom: 50px; font-weight: 300; text-transform: uppercase; }
         
-        button { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(212, 175, 55, 0.4); color: #FFDF73; padding: 16px 40px; font-size: 0.9rem; letter-spacing: 2px; cursor: pointer; transition: all 0.4s ease; text-transform: uppercase; border-radius: 50px; margin: 10px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); font-weight: 500; }
+        /* Botón más grande */
+        button { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(212, 175, 55, 0.4); color: #FFDF73; padding: 22px 40px; font-size: 1.3rem; letter-spacing: 2px; cursor: pointer; transition: all 0.4s ease; text-transform: uppercase; border-radius: 50px; margin: 10px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); font-weight: 600; width: 85%; max-width: 350px;}
         button:hover { background: rgba(212, 175, 55, 0.15); border-color: #FFDF73; box-shadow: 0 8px 32px 0 rgba(212, 175, 55, 0.2), inset 0 0 15px rgba(212, 175, 55, 0.1); transform: translateY(-2px); color: #fff; }
-        #btn-num { background: rgba(212, 175, 55, 0.15); font-weight: 600; color: #fff; border: 1px solid rgba(212, 175, 55, 0.6); }
+        #btn-num { background: rgba(212, 175, 55, 0.15); font-weight: bold; color: #fff; border: 1px solid rgba(212, 175, 55, 0.6); padding: 18px 30px; font-size: 1.1rem; } /* Botón final un poco más proporcionado */
 
-        /* NUEVOS CONTROLES SUPERIORES (Cámara y Sonido) */
-        .top-controls { position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; z-index: 100; pointer-events: none; }
-        .glass-icon-btn { pointer-events: auto; padding: 10px 20px; font-size: 0.75rem; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border-radius: 30px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); margin: 0; box-shadow: none; text-transform: none; font-weight: normal; letter-spacing: 1px; }
-        .glass-icon-btn:hover { background: rgba(0,0,0,0.4); color: #fff; transform: none; border-color: rgba(255,255,255,0.3); }
+        /* Controles superiores */
+        .top-controls { position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-between; padding: 0 15px; box-sizing: border-box; z-index: 100; pointer-events: none; }
+        .glass-icon-btn { pointer-events: auto; padding: 12px 18px; font-size: 0.95rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.9); border-radius: 30px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); margin: 0; box-shadow: none; text-transform: none; font-weight: 500; letter-spacing: 1px; width: auto; }
+        .glass-icon-btn:hover { background: rgba(0,0,0,0.6); color: #fff; transform: none; border-color: rgba(255,255,255,0.4); }
 
-        .scanner-laser { position: absolute; left: 0; width: 100%; height: 2px; background: #FFDF73; box-shadow: 0 0 15px #d4af37; animation: laserScan 2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate; z-index: 25; display: none; pointer-events: none; }
+        .scanner-laser { position: absolute; left: 0; width: 100%; height: 3px; background: #FFDF73; box-shadow: 0 0 15px #d4af37; animation: laserScan 2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate; z-index: 25; display: none; pointer-events: none; }
         @keyframes laserScan { 0% { top: 5%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 95%; opacity: 0; } }
 
         #scan-screen { display: none; z-index: 20; pointer-events: none; }
-        .scan-text { font-size: 1.1rem; letter-spacing: 5px; font-weight: 300; animation: pulse 2s infinite ease-in-out; text-shadow: 0 0 10px rgba(212, 175, 55, 0.6); color: #FFDF73; text-transform: uppercase; }
+        .scan-text { font-size: 1.4rem; letter-spacing: 4px; font-weight: 400; animation: pulse 2s infinite ease-in-out; text-shadow: 0 0 10px rgba(212, 175, 55, 0.6); color: #FFDF73; text-transform: uppercase; }
         @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
 
         #result-screen { display: none; align-items: center; z-index: 30; }
         
-        .result-card { background: rgba(15, 15, 18, 0.65); border: 1px solid rgba(255, 255, 255, 0.08); padding: 40px 25px; border-radius: 32px; backdrop-filter: blur(20px) saturate(120%); -webkit-backdrop-filter: blur(20px) saturate(120%); max-width: 500px; width: 88%; margin-top: auto; margin-bottom: 5vh; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .result-card { background: rgba(15, 15, 18, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); padding: 35px 20px; border-radius: 30px; backdrop-filter: blur(20px) saturate(120%); -webkit-backdrop-filter: blur(20px) saturate(120%); max-width: 500px; width: 92%; margin-top: auto; margin-bottom: 4vh; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
         
-        .res-subtitle { font-size: 0.7rem; letter-spacing: 4px; color: rgba(255,255,255,0.5); margin-bottom: 15px; text-transform: uppercase; font-weight: 600; }
-        .res-color-name { font-size: 2.4rem; font-weight: normal; margin-bottom: 5px; letter-spacing: 1px; }
-        .res-hz { font-family: 'Courier New', monospace; font-size: 1rem; color: rgba(255,255,255,0.9); margin-bottom: 20px; letter-spacing: 3px; }
+        .res-subtitle { font-size: 0.95rem; letter-spacing: 3px; color: rgba(255,255,255,0.6); margin-bottom: 10px; text-transform: uppercase; font-weight: 600; }
+        .res-color-name { font-size: clamp(2.2rem, 9vw, 3rem); font-weight: normal; margin-bottom: 5px; letter-spacing: 1px; line-height: 1.1; }
+        .res-hz { font-family: 'Courier New', monospace; font-size: 1.25rem; color: rgba(255,255,255,0.95); margin-bottom: 20px; letter-spacing: 2px; font-weight: bold;}
         
         .bio-stats { display: flex; justify-content: space-between; margin-bottom: 25px; gap: 8px; }
-        .stat-box { flex: 1; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px 2px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; }
-        .stat-label { color: rgba(255,255,255,0.4); font-size: 0.6rem; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; font-weight: 600; text-align: center;}
-        .stat-value { font-family: 'Courier New', monospace; font-size: 1rem; font-weight: bold; }
+        .stat-box { flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); padding: 12px 2px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; }
+        .stat-label { color: rgba(255,255,255,0.6); font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; font-weight: bold; text-align: center;}
+        .stat-value { font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: bold; color: #fff;}
         
-        .res-meaning { font-size: 1rem; color: rgba(255,255,255,0.85); line-height: 1.5; font-weight: 300; margin-bottom: 25px; }
+        .res-meaning { font-size: 1.15rem; color: rgba(255,255,255,0.9); line-height: 1.5; font-weight: 400; margin-bottom: 25px; padding: 0 10px; }
     </style>
 </head>
 <body>
@@ -70,17 +71,17 @@
 
         <div id="intro-screen" class="ui-layer">
             <div class="logo-title serif-text">AuraSens</div>
-            <div class="logo-subtitle">Lectura Geométrica de Energía</div>
+            <div class="logo-subtitle">Lectura Geométrica</div>
             <button id="btn-start">Comenzar Sesión</button>
         </div>
 
         <div id="scan-screen" class="ui-layer">
-            <div class="scan-text">Calibrando Espectro...</div>
+            <div class="scan-text">Calibrando Energía...</div>
         </div>
 
         <div id="result-screen" class="ui-layer">
             <div class="result-card" id="r-card">
-                <div class="res-subtitle">Sincronización Completada</div>
+                <div class="res-subtitle">Sincronización Completa</div>
                 <div class="res-color-name serif-text" id="r-title">---</div>
                 <div class="res-hz" id="r-hz">--- Hz</div>
                 
@@ -93,7 +94,7 @@
                 <div class="res-meaning serif-text" id="r-desc">---</div>
                 <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
                     <button id="btn-num">Guardar Análisis</button>
-                    <button id="btn-reset" style="background: transparent; border: none; font-size: 0.8rem; color: #888; box-shadow: none;">Finalizar</button>
+                    <button id="btn-reset" style="background: transparent; border: none; font-size: 1rem; color: #aaa; box-shadow: none; padding: 10px; width: auto;">Finalizar Sesión</button>
                 </div>
             </div>
         </div>
@@ -125,18 +126,16 @@
     let appState = 'intro'; 
     let finalAuraData = null; 
     let finalBioStats = null;
-    let facingMode = 'user'; // 'user' = selfie, 'environment' = trasera
+    let facingMode = 'user'; 
     let cameraActive = null;
 
-    // --- LÓGICA DE CÁMARA OPTIMIZADA ---
     async function startCamera() {
         if (cameraActive) await cameraActive.stop();
-        // Efecto espejo solo si es cámara frontal
         canvasElement.style.transform = (facingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
         
         cameraActive = new Camera(videoElement, {
             onFrame: async () => { await faceMesh.send({image: videoElement}); },
-            width: 640, height: 480, // Resolución más ligera para móviles
+            width: 640, height: 480, 
             facingMode: facingMode
         });
         cameraActive.start();
@@ -147,20 +146,18 @@
         startCamera();
     });
 
-    // --- FÍSICA Y ENTORNO ESPACIAL OPTIMIZADO (Menos partículas = Mejor rendimiento) ---
     let lastFaceX = null; let lastFaceY = null; let windX = 0; let windY = 0; let targetWindX = 0; let targetWindY = 0;
 
     let particles = [];
-    for(let i = 0; i < 30; i++) { // Reducido de 60 a 30
+    for(let i = 0; i < 30; i++) { 
         particles.push({
             x: Math.random(), y: Math.random(), size: Math.random() * 2 + 0.5,
-            speedY: -(Math.random() * 0.003 + 0.001), speedX: (Math.random() - 0.5) * 0.001, 
-            opacity: Math.random() * 0.5 + 0.1
+            speedY: -(Math.random() * 0.003 + 0.001), speedX: (Math.random() - 0.5) * 0.001, opacity: Math.random() * 0.5 + 0.1
         });
     }
 
     let petals = [];
-    for(let i = 0; i < 15; i++) { // Reducido de 35 a 15
+    for(let i = 0; i < 15; i++) { 
         petals.push({
             x: Math.random(), y: Math.random(), size: Math.random() * 5 + 3, 
             speedY: Math.random() * 0.002 + 0.002, speedX: (Math.random() - 0.5) * 0.001, 
@@ -190,7 +187,6 @@
         canvasCtx.restore();
     }
 
-    // --- MOTOR DE AUDIO ---
     let audioCtx; let masterGain; let activeOscillators = []; let activeGains = []; let isMuted = false;
     function initAudio() {
         if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); masterGain = audioCtx.createGain(); masterGain.connect(audioCtx.destination); masterGain.gain.value = isMuted ? 0 : 1; }
@@ -258,7 +254,6 @@
         setTimeout(() => {
             const tempCanvas = document.createElement('canvas'); tempCanvas.width = canvasElement.width; tempCanvas.height = canvasElement.height; const tempCtx = tempCanvas.getContext('2d');
             
-            // Lógica para que la descarga NO salga invertida si se usó la cámara frontal
             if(facingMode === 'user') { tempCtx.translate(tempCanvas.width, 0); tempCtx.scale(-1, 1); }
             
             tempCtx.drawImage(canvasElement, 0, 0); tempCtx.setTransform(1, 0, 0, 1, 0, 0); 
@@ -291,7 +286,6 @@
         canvasCtx.save(); canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
         canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
         
-        // Optimización de fondo: FillRect simple en lugar de Gradient pesado cada frame
         let alphaLevel = (appState === 'scanning') ? 0.4 : (appState === 'result' ? 0.75 : 0.25);
         canvasCtx.fillStyle = `rgba(10, 10, 15, ${alphaLevel})`; 
         canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
@@ -302,7 +296,6 @@
             if (lastFaceX !== null) { let dx = -(currentFaceX - lastFaceX); let dy = (currentFaceY - lastFaceY); targetWindX = dx * 1.5; targetWindY = dy * 1.5; }
             lastFaceX = currentFaceX; lastFaceY = currentFaceY;
 
-            // Optimización: Cálculo sin requerir "refineLandmarks" (Puntos estándar 33 y 263 en lugar de 468/473)
             const eyeDist = Math.hypot(face[33].x - face[263].x, face[33].y - face[263].y); 
             const jawWidth = Math.hypot(face[132].x - face[361].x, face[132].y - face[361].y); 
             const noseLen = Math.hypot(face[168].x - face[2].x, face[168].y - face[2].y); 
@@ -326,10 +319,8 @@
             FACIAL_OUTLINE.forEach((index, i) => { const pt = face[index]; if (i === 0) canvasCtx.moveTo(pt.x * canvasElement.width, pt.y * canvasElement.height); else canvasCtx.lineTo(pt.x * canvasElement.width, pt.y * canvasElement.height); });
             canvasCtx.closePath();
 
-            // Sombra reducida para no saturar móviles
             canvasCtx.shadowBlur = (appState === 'result') ? 20 : 10; canvasCtx.shadowColor = drawColor; canvasCtx.strokeStyle = drawColor; canvasCtx.lineWidth = (appState === 'result') ? 6 : 3; canvasCtx.stroke(); canvasCtx.shadowBlur = 0;
 
-            // Malla más ligera: dibujando menos líneas (i+=11 en lugar de i+=7)
             canvasCtx.lineWidth = 0.5; canvasCtx.strokeStyle = drawColor + "66"; canvasCtx.beginPath();
             for (let i = 0; i < face.length - 15; i += 11) { canvasCtx.moveTo(face[i].x * canvasElement.width, face[i].y * canvasElement.height); canvasCtx.lineTo(face[i+4].x * canvasElement.width, face[i+4].y * canvasElement.height); canvasCtx.lineTo(face[i+8].x * canvasElement.width, face[i+8].y * canvasElement.height); }
             canvasCtx.stroke();
@@ -340,11 +331,10 @@
     }
 
     const faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
-    // ¡Clave para rendimiento en móviles! refineLandmarks apagado
     faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: false, minDetectionConfidence: 0.6 });
     faceMesh.onResults(onResults);
     
-    startCamera(); // Inicia con cámara frontal por defecto
+    startCamera(); 
 </script>
 </body>
 </html>
