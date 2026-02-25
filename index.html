@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>AuraSens - Captura Vertical Premium</title>
+    <title>AuraSens - UI Final Ajustada</title>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 
@@ -15,42 +15,84 @@
         .input_video { display: none; }
         .output_canvas { width: 100vw; height: 100vh; object-fit: cover; } 
 
-        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); text-align: center; }
+        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s ease; text-align: center; }
         
         #intro-screen { background: rgba(10, 10, 12, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 10; }
         
-        .logo-title { font-size: clamp(4.5rem, 15vw, 6.5rem); letter-spacing: 4px; margin-bottom: 5px; text-transform: uppercase; background: linear-gradient(135deg, #FFDF73 0%, #d4af37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 4px 15px rgba(212, 175, 55, 0.3)); }
-        .logo-subtitle { font-size: clamp(1.4rem, 5vw, 1.7rem); letter-spacing: 3px; color: rgba(255, 255, 255, 0.9); margin-bottom: 50px; font-weight: 300; text-transform: uppercase; }
+        .logo-title { font-size: clamp(3.5rem, 14vw, 5.5rem); letter-spacing: 4px; margin-bottom: 0; text-transform: uppercase; background: linear-gradient(135deg, #FFDF73 0%, #d4af37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 4px 15px rgba(212, 175, 55, 0.3)); }
+        .logo-subtitle { font-size: clamp(1.2rem, 4vw, 1.5rem); letter-spacing: 3px; color: rgba(255, 255, 255, 0.9); margin-bottom: 40px; font-weight: 300; text-transform: uppercase; }
         
-        button { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(212, 175, 55, 0.4); color: #FFDF73; padding: 22px 40px; font-size: 1.3rem; letter-spacing: 2px; cursor: pointer; transition: all 0.4s ease; text-transform: uppercase; border-radius: 50px; margin: 10px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); font-weight: 600; width: 85%; max-width: 350px;}
-        button:hover { background: rgba(212, 175, 55, 0.15); border-color: #FFDF73; box-shadow: 0 8px 32px 0 rgba(212, 175, 55, 0.2), inset 0 0 15px rgba(212, 175, 55, 0.1); transform: translateY(-2px); color: #fff; }
-        #btn-num { background: rgba(212, 175, 55, 0.15); font-weight: bold; color: #fff; border: 1px solid rgba(212, 175, 55, 0.6); padding: 18px 30px; font-size: 1.1rem; }
+        /* Botones Principales Optimizados */
+        button { font-family: -apple-system, sans-serif; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(212, 175, 55, 0.4); color: #FFDF73; padding: 18px 25px; font-size: 1.1rem; letter-spacing: 1.5px; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; border-radius: 50px; margin: 8px 0; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); font-weight: 600; width: 90%; max-width: 320px; }
+        button:hover { background: rgba(212, 175, 55, 0.15); border-color: #FFDF73; color: #fff; }
+        #btn-num { background: rgba(212, 175, 55, 0.15); font-weight: bold; color: #fff; border: 1px solid rgba(212, 175, 55, 0.6); font-size: 1.2rem; }
 
-        .top-controls { position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-between; padding: 0 15px; box-sizing: border-box; z-index: 100; pointer-events: none; }
-        .glass-icon-btn { pointer-events: auto; padding: 12px 18px; font-size: 0.95rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.9); border-radius: 30px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); margin: 0; box-shadow: none; text-transform: none; font-weight: 500; letter-spacing: 1px; width: auto; }
-        .glass-icon-btn:hover { background: rgba(0,0,0,0.6); color: #fff; transform: none; border-color: rgba(255,255,255,0.4); }
+        /* --- AJUSTE 1: CONTROLES SUPERIORES MÁS GRANDES --- */
+        .top-controls { position: absolute; top: 30px; /* Más abajo */ width: 100%; display: flex; justify-content: space-between; padding: 0 25px; box-sizing: border-box; z-index: 100; pointer-events: none; }
+        .glass-icon-btn { 
+            pointer-events: auto; 
+            padding: 15px 28px; /* Mucho más grandes */
+            font-size: 1.2rem; /* Texto más grande */
+            background: rgba(0, 0, 0, 0.6); /* Un poco más oscuros para contraste */
+            border: 1px solid rgba(255,255,255,0.3); 
+            color: #fff;
+            border-radius: 40px; 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            margin: 0; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-transform: none; font-weight: 600; letter-spacing: 1px; width: auto; 
+        }
 
-        .scanner-laser { position: absolute; left: 0; width: 100%; height: 3px; background: #FFDF73; box-shadow: 0 0 15px #d4af37; animation: laserScan 2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate; z-index: 25; display: none; pointer-events: none; }
+        .scanner-laser { position: absolute; left: 0; width: 100%; height: 3px; background: #FFDF73; box-shadow: 0 0 15px #d4af37; animation: laserScan 2s ease-in-out infinite alternate; z-index: 25; display: none; pointer-events: none; }
         @keyframes laserScan { 0% { top: 5%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 95%; opacity: 0; } }
 
         #scan-screen { display: none; z-index: 20; pointer-events: none; }
-        .scan-text { font-size: 1.4rem; letter-spacing: 4px; font-weight: 400; animation: pulse 2s infinite ease-in-out; text-shadow: 0 0 10px rgba(212, 175, 55, 0.6); color: #FFDF73; text-transform: uppercase; }
+        .scan-text { font-size: 1.3rem; letter-spacing: 3px; font-weight: 500; animation: pulse 2s infinite ease-in-out; text-shadow: 0 0 10px rgba(212, 175, 55, 0.6); color: #FFDF73; text-transform: uppercase; }
         @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
 
-        #result-screen { display: none; align-items: center; z-index: 30; }
+        /* --- AJUSTE 2: POSICIÓN DE LA TARJETA --- */
+        #result-screen { 
+            display: none; 
+            align-items: center; 
+            justify-content: flex-end; /* ALINEAR AL FONDO EN LUGAR DEL CENTRO */
+            z-index: 30; 
+            padding: 15px; 
+            padding-bottom: 5vh; /* Espacio extra abajo para que no pegue al borde */
+            box-sizing: border-box; 
+        }
         
-        .result-card { background: rgba(15, 15, 18, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); padding: 35px 20px; border-radius: 30px; backdrop-filter: blur(20px) saturate(120%); -webkit-backdrop-filter: blur(20px) saturate(120%); max-width: 500px; width: 92%; margin-top: auto; margin-bottom: 4vh; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        /* TARJETA RESPONSIVA */
+        .result-card { 
+            background: rgba(15, 15, 18, 0.85); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            padding: 25px 15px;
+            border-radius: 30px; 
+            backdrop-filter: blur(25px) saturate(120%); 
+            -webkit-backdrop-filter: blur(25px) saturate(120%); 
+            width: 100%; 
+            max-width: 450px; 
+            max-height: 85vh; /* Límite de altura por seguridad */
+            overflow-y: auto; 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9); /* Sombra más fuerte para separar del fondo */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
         
-        .res-subtitle { font-size: 0.95rem; letter-spacing: 3px; color: rgba(255,255,255,0.6); margin-bottom: 10px; text-transform: uppercase; font-weight: 600; }
-        .res-color-name { font-size: clamp(2.2rem, 9vw, 3rem); font-weight: normal; margin-bottom: 5px; letter-spacing: 1px; line-height: 1.1; }
-        .res-hz { font-family: 'Courier New', monospace; font-size: 1.25rem; color: rgba(255,255,255,0.95); margin-bottom: 20px; letter-spacing: 2px; font-weight: bold;}
+        .res-subtitle { font-size: 0.9rem; letter-spacing: 3px; color: rgba(255,255,255,0.6); margin-bottom: 5px; text-transform: uppercase; font-weight: 700; text-align: center; width: 100%;}
+        .res-color-name { font-size: 2.8rem; font-weight: bold; margin-bottom: 0; letter-spacing: 1px; line-height: 1.1; text-align: center; width: 100%;}
+        .res-hz { font-family: 'Courier New', monospace; font-size: 1.3rem; color: #fff; margin-bottom: 20px; letter-spacing: 2px; font-weight: bold; text-align: center; width: 100%;}
         
-        .bio-stats { display: flex; justify-content: space-between; margin-bottom: 25px; gap: 8px; }
-        .stat-box { flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); padding: 12px 2px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; }
-        .stat-label { color: rgba(255,255,255,0.6); font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; font-weight: bold; text-align: center;}
-        .stat-value { font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: bold; color: #fff;}
+        .bio-stats { display: flex; justify-content: space-between; width: 100%; margin-bottom: 20px; gap: 6px; }
+        .stat-box { flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 0; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center;}
+        .stat-label { color: rgba(255,255,255,0.7); font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; font-weight: 700; text-align: center;}
+        .stat-value { font-family: 'Courier New', monospace; font-size: 1.4rem; font-weight: bold; color: #fff;}
         
-        .res-meaning { font-size: 1.15rem; color: rgba(255,255,255,0.9); line-height: 1.5; font-weight: 400; margin-bottom: 25px; padding: 0 10px; }
+        .res-meaning { font-size: 1.35rem; color: rgba(255,255,255,0.95); line-height: 1.4; font-weight: 600; margin-bottom: 25px; padding: 0 5px; text-align: center; width: 100%; box-sizing: border-box;}
+
+        .btn-container { display: flex; flex-direction: column; gap: 10px; align-items: center; width: 100%; }
+        #btn-reset { background: transparent; border: none; font-size: 1.1rem; color: #aaa; box-shadow: none; padding: 10px; text-decoration: underline;}
     </style>
 </head>
 <body>
@@ -68,7 +110,7 @@
 
         <div id="intro-screen" class="ui-layer">
             <div class="logo-title serif-text">AuraSens</div>
-            <div class="logo-subtitle">Lectura Geométrica</div>
+            <div class="logo-subtitle">Firma Biométrica</div>
             <button id="btn-start">Comenzar Sesión</button>
         </div>
 
@@ -89,9 +131,10 @@
                 </div>
 
                 <div class="res-meaning serif-text" id="r-desc">---</div>
-                <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+                
+                <div class="btn-container">
                     <button id="btn-num">Guardar Análisis</button>
-                    <button id="btn-reset" style="background: transparent; border: none; font-size: 1rem; color: #aaa; box-shadow: none; padding: 10px; width: auto;">Finalizar Sesión</button>
+                    <button id="btn-reset">Finalizar Sesión</button>
                 </div>
             </div>
         </div>
@@ -210,7 +253,7 @@
             rDesc.innerText = finalAuraData.desc;
             rBpm.innerText = `${finalBioStats.bpm}`; rTemp.innerText = `${finalBioStats.temp}°C`; rCoh.innerText = `${finalBioStats.coherence}%`;
             rBpm.style.color = finalAuraData.color; rTemp.style.color = finalAuraData.color; rCoh.style.color = finalAuraData.color;
-            rCard.style.boxShadow = `0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 60px ${finalAuraData.color}22`;
+            rCard.style.boxShadow = `0 20px 50px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 80px ${finalAuraData.color}22`;
             playAuraFrequency(finalAuraData.hz); 
         }, 3500);
     });
@@ -221,105 +264,57 @@
         finalAuraData = null; finalBioStats = null; stopAudio(); 
     });
 
-    // SISTEMA DE RENDERIZADO VERTICAL 9:16 (Calidad de Historia de Instagram 1080x1920)
+    // SISTEMA DE RENDERIZADO VERTICAL IG STORY (1080x1920)
     btnNum.addEventListener('click', () => {
         setTimeout(() => {
             const tempCanvas = document.createElement('canvas');
-            const expWidth = 1080;
-            const expHeight = 1920;
-            tempCanvas.width = expWidth;
-            tempCanvas.height = expHeight;
+            const expWidth = 1080; const expHeight = 1920;
+            tempCanvas.width = expWidth; tempCanvas.height = expHeight;
             const tempCtx = tempCanvas.getContext('2d');
             
-            // Lógica de recorte para centrar la cámara (Object-fit: cover real)
             const srcRatio = canvasElement.width / canvasElement.height;
             const expRatio = expWidth / expHeight;
             let drawWidth, drawHeight, drawX, drawY;
 
             if (srcRatio > expRatio) {
-                // El video es más ancho que la plantilla vertical
-                drawHeight = expHeight;
-                drawWidth = canvasElement.width * (expHeight / canvasElement.height);
-                drawX = (expWidth - drawWidth) / 2; // Centrar horizontalmente
-                drawY = 0;
+                drawHeight = expHeight; drawWidth = canvasElement.width * (expHeight / canvasElement.height);
+                drawX = (expWidth - drawWidth) / 2; drawY = 0;
             } else {
-                drawWidth = expWidth;
-                drawHeight = canvasElement.height * (expWidth / canvasElement.width);
-                drawX = 0;
-                drawY = (expHeight - drawHeight) / 2; // Centrar verticalmente
+                drawWidth = expWidth; drawHeight = canvasElement.height * (expWidth / canvasElement.width);
+                drawX = 0; drawY = (expHeight - drawHeight) / 2;
             }
             
             tempCtx.save();
-            if(facingMode === 'user') { 
-                tempCtx.translate(expWidth, 0); 
-                tempCtx.scale(-1, 1); 
-            }
-            
-            // Dibujar video original recortado
+            if(facingMode === 'user') { tempCtx.translate(expWidth, 0); tempCtx.scale(-1, 1); }
             tempCtx.drawImage(canvasElement, drawX, drawY, drawWidth, drawHeight);
             tempCtx.restore();
 
             drawInfographicOverlay(tempCtx, finalAuraData, finalBioStats, expWidth, expHeight);
             
-            const dataURL = tempCanvas.toDataURL('image/jpeg', 0.9); // JPEG para descargar más rápido
+            const dataURL = tempCanvas.toDataURL('image/jpeg', 0.9);
             const link = document.createElement('a');
             link.download = `AuraSens_IG_Story_${finalAuraData.name.replace(/ /g, '_')}.jpg`; 
             link.href = dataURL; link.click();
         }, 50);
     });
 
-    // TEXTOS ENORMES PARA LA EXPORTACIÓN DE 1080x1920
     function drawInfographicOverlay(ctx, data, stats, width, height) {
         ctx.save();
-        const panelHeight = 550;
-        const panelY = height - panelHeight;
-
-        // Fondo oscuro elegante para legibilidad
-        ctx.fillStyle = 'rgba(15, 15, 18, 0.9)'; 
-        ctx.fillRect(0, panelY, width, panelHeight);
+        const panelHeight = 550; const panelY = height - panelHeight;
+        ctx.fillStyle = 'rgba(15, 15, 18, 0.9)'; ctx.fillRect(0, panelY, width, panelHeight);
+        ctx.strokeStyle = data.color + '88'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, panelY); ctx.lineTo(width, panelY); ctx.stroke();
         
-        ctx.strokeStyle = data.color + '88'; 
-        ctx.lineWidth = 4; 
-        ctx.beginPath(); 
-        ctx.moveTo(0, panelY); 
-        ctx.lineTo(width, panelY); 
-        ctx.stroke();
+        ctx.font = 'bold 90px Garamond'; ctx.fillStyle = data.color; ctx.textAlign = 'center'; ctx.fillText(data.name, width / 2, panelY + 130);
+        ctx.font = '600 32px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillText(`FRECUENCIA RESONANTE: ${data.hz} HZ`, width / 2, panelY + 190);
         
-        // Título del Color
-        ctx.font = 'normal 90px Garamond'; 
-        ctx.fillStyle = data.color; 
-        ctx.textAlign = 'center'; 
-        ctx.fillText(data.name, width / 2, panelY + 130);
+        ctx.font = 'bold 36px Courier New'; ctx.fillStyle = data.color;
+        ctx.fillText(`PULSO: ${stats.bpm} BPM`, width / 2 - 300, panelY + 280); ctx.fillText(`TEMP: ${stats.temp} °C`, width / 2, panelY + 280); ctx.fillText(`COHERENCIA: ${stats.coherence}%`, width / 2 + 300, panelY + 280);
         
-        // Frecuencia
-        ctx.font = '300 32px sans-serif'; 
-        ctx.fillStyle = 'rgba(255,255,255,0.9)'; 
-        ctx.fillText(`FRECUENCIA RESONANTE: ${data.hz} HZ`, width / 2, panelY + 190);
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(width / 2 - 400, panelY + 340); ctx.lineTo(width / 2 + 400, panelY + 340); ctx.stroke();
         
-        // Datos biométricos
-        ctx.font = 'bold 32px Courier New'; 
-        ctx.fillStyle = data.color;
-        ctx.fillText(`PULSO: ${stats.bpm} BPM`, width / 2 - 300, panelY + 280); 
-        ctx.fillText(`TEMP: ${stats.temp} °C`, width / 2, panelY + 280); 
-        ctx.fillText(`COHERENCIA: ${stats.coherence}%`, width / 2 + 300, panelY + 280);
+        ctx.font = 'italic 42px Garamond'; ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.fillText(data.desc, width / 2, panelY + 410, 950);
         
-        // Línea divisora
-        ctx.strokeStyle = 'rgba(255,255,255,0.15)'; 
-        ctx.lineWidth = 2; 
-        ctx.beginPath(); 
-        ctx.moveTo(width / 2 - 400, panelY + 340); 
-        ctx.lineTo(width / 2 + 400, panelY + 340); 
-        ctx.stroke();
-        
-        // Descripción (Usando max-width de 950px para que no toque los bordes)
-        ctx.font = 'italic 38px Garamond'; 
-        ctx.fillStyle = 'rgba(255,255,255,0.8)'; 
-        ctx.fillText(data.desc, width / 2, panelY + 410, 950);
-        
-        // Footer del Salón
-        ctx.font = '300 24px sans-serif'; 
-        ctx.fillStyle = 'rgba(255,255,255,0.4)'; 
-        ctx.fillText("A U R A S E N S   |   B I O F E E D B A C K", width / 2, panelY + 490);
+        ctx.font = '400 24px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fillText("A U R A S E N S   |   B I O F E E D B A C K", width / 2, panelY + 490);
         ctx.restore();
     }
 
@@ -329,8 +324,7 @@
         canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
         
         let alphaLevel = (appState === 'scanning') ? 0.4 : (appState === 'result' ? 0.75 : 0.25);
-        canvasCtx.fillStyle = `rgba(10, 10, 15, ${alphaLevel})`; 
-        canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+        canvasCtx.fillStyle = `rgba(10, 10, 15, ${alphaLevel})`; canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
 
         if (results.multiFaceLandmarks && results.multiFaceLandmarks[0]) {
             const face = results.multiFaceLandmarks[0];
